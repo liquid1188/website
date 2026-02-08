@@ -15,6 +15,12 @@
         .nav-links{display:flex;gap:2rem;list-style:none}
         .nav-links a{font-family:'Lato',sans-serif;font-size:.75rem;color:var(--text);text-decoration:none;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:color .3s}
         .nav-links a:hover,.nav-links a.active{color:var(--burgundy)}
+        .hamburger{display:none;flex-direction:column;cursor:pointer;gap:5px;padding:5px}
+        .hamburger span{width:25px;height:2px;background:var(--burgundy);transition:all .3s}
+        .hamburger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+        .hamburger.active span:nth-child(2){opacity:0}
+        .hamburger.active span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+        @media(max-width:700px){.hamburger{display:flex}.nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(250,248,245,.98);flex-direction:column;padding:1rem;gap:0;border-bottom:1px solid rgba(201,169,98,.2)}.nav-links.active{display:flex}.nav-links li{padding:.75rem 1rem;border-bottom:1px solid rgba(201,169,98,.1)}.nav-links li:last-child{border-bottom:none}}
         .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:7rem 1.5rem 3rem;background:linear-gradient(180deg,var(--ivory),var(--cream));text-align:center;position:relative}
         .hero-content{position:relative;z-index:1;max-width:800px}
         .hero-subtitle{font-family:'Lato',sans-serif;font-size:.8rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold-dark);margin-bottom:1.25rem}
@@ -171,7 +177,7 @@
         .submit-btn{width:100%;padding:.85rem;font-family:'Lato',sans-serif;font-size:.75rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:linear-gradient(135deg,var(--burgundy),var(--burgundy-deep));border:none;border-radius:4px;cursor:pointer}
         .submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px -8px rgba(114,47,55,.4)}
         @media(max-width:900px){.services-preview-grid,.toc-grid,.services-grid,.credentials-grid{grid-template-columns:1fr}.endorsements-grid{grid-template-columns:1fr}.endorsement-card.featured{grid-column:span 1}.books-edited-grid{grid-template-columns:repeat(2,1fr)}.book-photos{grid-template-columns:1fr}}
-        @media(max-width:700px){.nav-links{display:none}.home-preview-grid,.home-preview-grid.reverse,.about-grid,.book-hero-grid,.contact-grid{grid-template-columns:1fr}.preview-image,.book-cover-large{max-width:220px;margin:0 auto 1.5rem}.home-preview-grid.reverse .preview-image{order:-1}.experience-item{grid-template-columns:1fr;gap:.3rem}.experience-date{text-align:left}.writing-item{grid-template-columns:1fr auto}.writing-date{display:none}.books-edited-grid{grid-template-columns:1fr}.hero-title{font-size:2.2rem}.section-title{font-size:1.8rem}}
+        @media(max-width:700px){.home-preview-grid,.home-preview-grid.reverse,.about-grid,.book-hero-grid,.contact-grid{grid-template-columns:1fr}.preview-image,.book-cover-large{max-width:220px;margin:0 auto 1.5rem}.home-preview-grid.reverse .preview-image{order:-1}.experience-item{grid-template-columns:1fr;gap:.3rem}.experience-date{text-align:left}.writing-item{grid-template-columns:1fr auto}.writing-date{display:none}.books-edited-grid{grid-template-columns:1fr}.hero-title{font-size:2.2rem}.section-title{font-size:1.8rem}}
         .footer-links-icons{display:flex;gap:2rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem}
         .footer-icon-link{display:flex;flex-direction:column;align-items:center;gap:.4rem;text-decoration:none;color:var(--text-light);font-size:.7rem;font-family:'Lato',sans-serif;transition:color .3s}
         .footer-icon-link:hover{color:var(--burgundy)}
@@ -200,7 +206,7 @@
     </style>
 </head>
 <body>
-    <nav><div class="nav-container"><a class="nav-logo" onclick="showPage('home')">Andrew Likoudis</a><ul class="nav-links"><li><a onclick="showPage('about')" id="nav-about">About</a></li><li><a onclick="showPage('book')" id="nav-book">Faith in Crisis</a></li><li><a onclick="showPage('consulting')" id="nav-consulting">Consulting</a></li><li><a onclick="showPage('writing')" id="nav-writing">Writing</a></li><li><a onclick="showPage('gallery')" id="nav-gallery">Gallery</a></li><li><a onclick="showPage('contact')" id="nav-contact">Contact</a></li></ul></div></nav>
+    <nav><div class="nav-container"><a class="nav-logo" onclick="showPage('home')">Andrew Likoudis</a><div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div><ul class="nav-links" id="nav-menu"><li><a onclick="showPage('about');closeMenu()" id="nav-about">About</a></li><li><a onclick="showPage('book');closeMenu()" id="nav-book">Faith in Crisis</a></li><li><a onclick="showPage('consulting');closeMenu()" id="nav-consulting">Consulting</a></li><li><a onclick="showPage('writing');closeMenu()" id="nav-writing">Writing</a></li><li><a onclick="showPage('gallery');closeMenu()" id="nav-gallery">Gallery</a></li><li><a onclick="showPage('contact');closeMenu()" id="nav-contact">Contact</a></li></ul></div></nav>
 
     <!-- HOME -->
     <div id="page-home" class="page active">
@@ -303,6 +309,14 @@
     </footer>
 
     <script>
+        function toggleMenu() {
+            document.querySelector('.hamburger').classList.toggle('active');
+            document.getElementById('nav-menu').classList.toggle('active');
+        }
+        function closeMenu() {
+            document.querySelector('.hamburger').classList.remove('active');
+            document.getElementById('nav-menu').classList.remove('active');
+        }
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
