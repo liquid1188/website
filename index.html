@@ -24,7 +24,9 @@
         .nav-container{max-width:1100px;margin:0 auto;padding:0 1.5rem;display:flex;justify-content:space-between;align-items:center}
         .nav-logo{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--burgundy);text-decoration:none;cursor:pointer}
         .nav-links{display:flex;gap:2rem;list-style:none}
-        .nav-links a{font-family:'Lato',sans-serif;font-size:.75rem;color:var(--text);text-decoration:none;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:color .3s}
+        .nav-links a{font-family:'Lato',sans-serif;font-size:.75rem;color:var(--text);text-decoration:none;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:color .3s;position:relative}
+        .nav-links a::after{content:'';position:absolute;bottom:-4px;left:50%;width:0;height:1.5px;background:var(--gold);transition:all .3s;transform:translateX(-50%)}
+        .nav-links a:hover::after,.nav-links a.active::after{width:100%}
         .nav-links a:hover,.nav-links a.active{color:var(--burgundy)}
         .hamburger{display:none;flex-direction:column;cursor:pointer;gap:5px;padding:5px}
         .hamburger span{width:25px;height:2px;background:var(--burgundy);transition:all .3s}
@@ -241,6 +243,27 @@
         .endorser-card .cite-role{font-family:"Lato",sans-serif;font-size:.65rem;color:var(--text-light);margin-top:.2rem;line-height:1.4}
         @media(max-width:900px){.endorser-grid{grid-template-columns:repeat(2,1fr)}.endorser-card.featured{grid-column:span 2;flex-direction:row;text-align:left}.endorser-card.featured .endorser-photo,.endorser-card.featured .endorser-initial{margin-bottom:0}}
         @media(max-width:600px){.endorser-grid{grid-template-columns:1fr}.endorser-card.featured{grid-column:span 1}}
+        /* Scroll reveal animations */
+        .reveal{opacity:0;transform:translateY(25px);transition:opacity .7s ease,transform .7s ease}
+        .reveal.visible{opacity:1;transform:translateY(0)}
+        .reveal-delay-1{transition-delay:.1s}.reveal-delay-2{transition-delay:.2s}.reveal-delay-3{transition-delay:.3s}.reveal-delay-4{transition-delay:.4s}
+        /* Hero staggered entrance */
+        .hero-content>*{opacity:0;transform:translateY(20px);animation:heroFadeIn .8s ease forwards}
+        .hero-content>*:nth-child(1){animation-delay:.1s}
+        .hero-content>*:nth-child(2){animation-delay:.25s}
+        .hero-content>*:nth-child(3){animation-delay:.4s}
+        .hero-content>*:nth-child(4){animation-delay:.55s}
+        .hero-content>*:nth-child(5){animation-delay:.7s}
+        .hero-content>*:nth-child(6){animation-delay:.85s}
+        .hero-content>*:nth-child(7){animation-delay:1s}
+        @keyframes heroFadeIn{to{opacity:1;transform:translateY(0)}}
+        /* Page transitions */
+        .page.fade-out{opacity:0;transition:opacity .2s ease}
+        .page.fade-in{opacity:1;transition:opacity .35s ease}
+        /* Gallery hover lift */
+        .gallery-item{transition:transform .3s ease,box-shadow .3s ease}
+        .gallery-item:hover{transform:translateY(-4px)}
+        .gallery-item:hover .img-frame{box-shadow:0 12px 35px -8px rgba(0,0,0,.2)}
     </style>
 </head>
 <body>
@@ -753,18 +776,64 @@
         }
         document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closeLightbox(); });
         function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const currentPage = document.querySelector('.page.active');
+            const targetPage = document.getElementById('page-' + pageId);
+            if (!targetPage) return;
+            
             document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-            const page = document.getElementById('page-' + pageId);
-            if (page) {
-                page.classList.add('active');
-            }
             const navLink = document.getElementById('nav-' + pageId);
             if (navLink) navLink.classList.add('active');
-            window.scrollTo(0, 0);
+            
+            if (currentPage && currentPage !== targetPage) {
+                currentPage.style.transition = 'opacity .2s ease';
+                currentPage.style.opacity = '0';
+                setTimeout(() => {
+                    currentPage.classList.remove('active');
+                    currentPage.style.opacity = '';
+                    currentPage.style.transition = '';
+                    targetPage.classList.add('active');
+                    targetPage.style.opacity = '0';
+                    targetPage.offsetHeight; // force reflow
+                    targetPage.style.transition = 'opacity .35s ease';
+                    targetPage.style.opacity = '1';
+                    window.scrollTo(0, 0);
+                    initReveals();
+                }, 200);
+            } else {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                targetPage.classList.add('active');
+                window.scrollTo(0, 0);
+                initReveals();
+            }
         }
-        // Activate home on load
-        showPage('home');
+
+        // Scroll reveal observer
+        function initReveals() {
+            const reveals = document.querySelectorAll('.page.active .reveal:not(.visible)');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+            reveals.forEach(el => observer.observe(el));
+        }
+
+        // Mark sections for reveal on load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add reveal class to major content sections (skip heroes)
+            document.querySelectorAll('.section-container, .featured-articles, .services-preview-grid, .about-grid, .credentials-grid, .experience-timeline, .gallery-grid, .books-edited-grid, .writing-grid, .endorser-grid').forEach(el => {
+                if (!el.closest('.hero')) el.classList.add('reveal');
+            });
+            // Add reveal to page-level CTA sections
+            document.querySelectorAll('.contact-cta-section > div, .affiliations > *, .page-hero-content').forEach(el => {
+                el.classList.add('reveal');
+            });
+            
+            showPage('home');
+        });
     </script>
 </body>
 </html>
